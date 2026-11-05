@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: media:; media-src 'self' media:;">
+    <title>Xperian Video Player</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Outfit:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-shell">
+
+        <aside class="sidebar">
+            <div class="sidebar-top">
+                <div class="brand-container">
+                    <div class="brand-logo">
+                        <svg viewBox="0 0 24 24" class="brand-clapperboard-svg" fill="currentColor">
+                            <path d="M18 4l2 3h-3l-2-3h-2l2 3h-3l-2-3H8l2 3H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4zm2 14H4V9h16v9z"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <span class="brand-title">XPERIAN</span>
+                        <span class="brand-subtitle">Video Oynatıcı</span>
+                    </div>
+                </div>
+                <div class="sidebar-actions">
+                    <button id="btn-settings" class="action-btn" title="Ayarlar">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.06-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.73,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.06,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </button>
+                    <button id="btn-folder" class="action-btn" title="Video Klasörü Seç">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></svg>
+                    </button>
+                    <button id="btn-file" class="action-btn" title="Video Dosyası Aç">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                    </button>
+                    <button id="btn-exit" class="action-btn danger" title="Çıkış">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="library-tabs">
+                <button class="tab active" data-view="videos">Videolar</button>
+                <button class="tab" data-view="folders">Klasörler</button>
+                <button class="tab" data-view="history">Geçmiş</button>
+            </div>
+            <div id="library-list" class="library-list">
+                <div class="empty-msg">Klasör seçin veya video ekleyin.</div>
+            </div>
+        </aside>
+
+        <!-- STAGE: box art + vinyl + panel yan yana -->
+        <div class="player-stage">
+            <!-- 0) VİDEO BİLGİLERİ — Ekranın sol üstünde yüzen kart -->
+            <div id="track-info" class="track-info-card">
+                <div class="now-playing-badge">ŞİMDİ OYNATILIYOR</div>
+                <p id="track-title" class="track-title">Video Seçilmedi</p>
+                <p id="track-artist" class="track-artist">—</p>
+            </div>
+
+            <!-- VİDEO OYNATICI ALANI (Tam Ekran Viewport) -->
+            <div class="video-container">
+                <!-- Gerçek izleme ekranı -->
+                <div class="video-viewport">
+                    <video id="main-video" class="main-video-el" playsinline></video>
+                    <!-- Merkez yükleme overlay katmanı -->
+                    <div id="video-overlay" class="video-overlay hidden">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3) PLAYER PANEL — Bottom Bar -->
+            <div id="player-panel" class="player-panel">
+                <div class="panel-content">
+                    <!-- Sol Kısım: Dengeleyici Boş Alan -->
+                    <div class="player-left-block"></div>
+
+                    <!-- Orta Kısım: Üstte Butonlar, Altta İlerleme Barı -->
+                    <div class="player-center-block">
+                        <!-- Üst Sıra: Kontroller -->
+                        <div class="controls">
+                            <button id="btn-shuffle" class="ctrl-btn" title="Karışık Çal">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.45 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                            </button>
+                            <button id="btn-prev" class="ctrl-btn">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                            </button>
+                            <button id="btn-play" class="ctrl-btn play-btn">
+                                <svg id="icon-play"  viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                <svg id="icon-pause" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                            </button>
+                            <button id="btn-next" class="ctrl-btn">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zm10-12v12h2V6h-2z"/></svg>
+                            </button>
+                            <button id="btn-repeat" class="ctrl-btn" title="Tekrar Çal">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Alt Sıra: Oynatma Çubuğu -->
+                        <div class="progress-row">
+                            <span id="time-cur">0:00</span>
+                            <div id="progress-bar" class="progress-bar">
+                                <div id="progress-fill" class="progress-fill"></div>
+                            </div>
+                            <span id="time-total">0:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Kısım: Ses / Mute Kontrolü (Hizalama ve Denge İçin) -->
+                    <div class="player-right-block">
+                        <button id="btn-volume" class="ctrl-btn" title="Sessiz / Sesli">
+                            <svg id="icon-vol-up" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                            <svg id="icon-vol-mute" class="hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.21.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                        </button>
+                        <div id="volume-bar" class="volume-bar" title="Ses Seviyesi">
+                            <div id="volume-fill" class="volume-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ayarlar Modalı (Settings Popup) -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-box">
+            <h2 class="modal-title">Görünüm Ayarları</h2>
+            <button id="btn-close-settings" class="modal-close">&times;</button>
+            
+            <div class="setting-group">
+                <label>Çözünürlük Ölçeği (UI Scale)</label>
+                <div class="res-options">
+                    <button class="res-btn" data-res="720p">720p</button>
+                    <button class="res-btn active" data-res="1080p">1080p</button>
+                    <button class="res-btn" data-res="1440p">1440p</button>
+                    <button class="res-btn" data-res="4k">4K</button>
+                </div>
+                <p class="setting-hint">1440p veya 4K ekranlarda arayüzün küçük kalmaması için ölçeği artırabilirsiniz.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
