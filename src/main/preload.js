@@ -1,6 +1,8 @@
 const { contextBridge, ipcRenderer, webFrame } = require('electron');
 
 contextBridge.exposeInMainWorld('api', {
+    getSettings: () => ipcRenderer.invoke('get-settings'),
+    saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
     getSavedFolder: ()       => ipcRenderer.invoke('get-saved-folder'),
     selectFolder:   ()       => ipcRenderer.invoke('select-folder'),
     selectFile:     ()       => ipcRenderer.invoke('select-file'),

@@ -23,8 +23,9 @@ protocol.registerSchemesAsPrivileged([
 const isPackaged = app.isPackaged;
 const appRootDir = process.env.PORTABLE_EXECUTABLE_DIR || (isPackaged ? path.dirname(app.getPath('exe')) : app.getAppPath());
 const tempDir = path.join(appRootDir, 'temp');
-const libraryIniPath = path.join(appRootDir, 'library.ini');
-const libraryJsonPath = path.join(appRootDir, 'library.json');
+const storage = require('./storage').createStorage(appRootDir);
+const libraryIniPath = path.join(storage.dataDir, 'library.ini');
+const libraryJsonPath = path.join(storage.dataDir, 'library.json');
 
 // Clean up stale temp directory from previous runs BEFORE setting userData (so no locks are held yet)
 try {
@@ -210,6 +211,8 @@ if (!gotTheLock) {
 // ─── IPC Handlers ─────────────────────────────────────────────────────────────
 
 ipcMain.handle('get-saved-folder', () => loadConfig());
+ipcMain.handle('get-settings', () => storage.getSettings());
+ipcMain.handle('save-settings', (event, patch) => storage.saveSettings(patch));
 
 ipcMain.handle('get-cached-library', () => {
     if (!fs.existsSync(libraryJsonPath)) return [];
@@ -234,7 +237,7 @@ ipcMain.handle('save-library-cache', (event, tracks) => {
 
 ipcMain.handle('select-folder', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Video Klasörünü Seçin',
+        title: storage.getSettings().language === 'en' ? 'Select Video Folder' : 'Video Klasörünü Seçin',
         properties: ['openDirectory']
     });
     if (result.canceled || result.filePaths.length === 0) return null;
@@ -245,7 +248,7 @@ ipcMain.handle('select-folder', async () => {
 
 ipcMain.handle('select-file', async () => {
     const result = await dialog.showOpenDialog(mainWindow, {
-        title: 'Video Dosyası Seçin',
+        title: storage.getSettings().language === 'en' ? 'Select Video File' : 'Video Dosyası Seçin',
         properties: ['openFile'],
         filters: [{ name: 'Video Files', extensions: ['mp4', 'webm', 'ogv', 'mkv', 'avi', 'mov', 'ts', 'm4v'] }]
     });
@@ -316,7 +319,7 @@ async function getMetadata(filePath) {
         let artwork = null;
         if (meta.common.picture && meta.common.picture.length > 0) {
             const pic = meta.common.picture[0];
-            artwork = `data:${pic.format};base64,${pic.data.toString('base64')}`;
+            artwork = `data:${pic.format};base64,${Buffer.from(pic.data).toString('base64')}`;
         }
         return {
             title:    meta.common.title  || base.title,

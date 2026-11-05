@@ -532,3 +532,5 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:var(--c-bg);color:
     margin-top:8px;
     line-height:1.4;
 }
+.setting-group + .setting-group { margin-top:24px; }
+#settings-error { color:var(--c-danger); }

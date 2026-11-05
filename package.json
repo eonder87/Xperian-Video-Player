@@ -1,6 +1,6 @@
 {
   "name": "xperian-video-player",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "XPERIAN Profesyonel Sinematik Video Oynatıcı",
   "main": "src/main/main.js",
   "scripts": {
@@ -10,12 +10,12 @@
   "author": "Xperian",
   "license": "ISC",
   "dependencies": {
-    "ini": "^6.0.0",
-    "music-metadata": "^7.14.0"
+    "ini": "7.0.0",
+    "music-metadata": "12.3.4"
   },
   "devDependencies": {
-    "electron": "^42.1.0",
-    "electron-builder": "^26.8.1"
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0"
   },
   "build": {
     "appId": "com.xperian.videoplayer",
@@ -31,5 +31,19 @@
       "icon": "icon.ico",
       "target": "portable"
     }
+  },
+  "overrides": {
+    "app-builder-lib": {
+      "minimatch": "11.0.4"
+    },
+    "@electron/universal": {
+      "minimatch": "11.0.4"
+    },
+    "@electron/asar": {
+      ".": "4.3.1",
+      "minimatch": "11.0.4",
+      "glob": "14.0.3"
+    },
+    "global-agent": "4.1.6"
   }
 }

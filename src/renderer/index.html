@@ -52,7 +52,7 @@
         <div class="player-stage">
             <!-- 0) VİDEO BİLGİLERİ — Ekranın sol üstünde yüzen kart -->
             <div id="track-info" class="track-info-card">
-                <div class="now-playing-badge">ŞİMDİ OYNATILIYOR</div>
+                <div class="now-playing-badge" data-i18n="nowPlaying">ŞİMDİ OYNATILIYOR</div>
                 <p id="track-title" class="track-title">Video Seçilmedi</p>
                 <p id="track-artist" class="track-artist">—</p>
             </div>
@@ -125,22 +125,31 @@
     <!-- Ayarlar Modalı (Settings Popup) -->
     <div id="settings-modal" class="modal-overlay hidden">
         <div class="modal-box">
-            <h2 class="modal-title">Görünüm Ayarları</h2>
+            <h2 class="modal-title" data-i18n="settings">Ayarlar</h2>
             <button id="btn-close-settings" class="modal-close">&times;</button>
             
             <div class="setting-group">
-                <label>Çözünürlük Ölçeği (UI Scale)</label>
+                <label data-i18n="scale">Çözünürlük Ölçeği</label>
                 <div class="res-options">
                     <button class="res-btn" data-res="720p">720p</button>
                     <button class="res-btn active" data-res="1080p">1080p</button>
                     <button class="res-btn" data-res="1440p">1440p</button>
                     <button class="res-btn" data-res="4k">4K</button>
                 </div>
-                <p class="setting-hint">1440p veya 4K ekranlarda arayüzün küçük kalmaması için ölçeği artırabilirsiniz.</p>
+                <p class="setting-hint" data-i18n="scaleHint">1440p veya 4K ekranlarda arayüzün küçük kalmaması için ölçeği artırabilirsiniz.</p>
+            </div>
+            <div class="setting-group">
+                <label id="language-label" data-i18n="language">Dil</label>
+                <div class="res-options" role="group" aria-labelledby="language-label">
+                    <button class="res-btn language-btn" data-language="tr" lang="tr" aria-pressed="true">Türkçe</button>
+                    <button class="res-btn language-btn" data-language="en" lang="en" aria-pressed="false">English</button>
+                </div>
+                <p id="settings-error" class="setting-hint hidden" role="alert" data-i18n="saveError"></p>
             </div>
         </div>
     </div>
 
+    <script src="i18n.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

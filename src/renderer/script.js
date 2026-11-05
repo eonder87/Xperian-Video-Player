@@ -38,7 +38,7 @@ const volumeFill     = document.getElementById('volume-fill');
 const btnSettings       = document.getElementById('btn-settings');
 const settingsModal     = document.getElementById('settings-modal');
 const btnCloseSettings  = document.getElementById('btn-close-settings');
-const resBtns           = document.querySelectorAll('.res-btn');
+const resBtns           = document.querySelectorAll('[data-res]');
 const appShell          = document.querySelector('.app-shell');
 const sidebar           = document.querySelector('.sidebar');
 
@@ -50,21 +50,21 @@ let isMouseInControls = false;
 window.addEventListener('DOMContentLoaded', async () => {
     console.log("DOMContentLoaded fired!");
     
-    // Auto-detect or Load Resolution Preference
-    let savedRes = localStorage.getItem('ui_resolution');
-    const explicit = localStorage.getItem('ui_resolution_explicit');
-    if (!savedRes || !explicit) {
-        const w = window.screen.width;
-        if (w >= 3840) savedRes = '4k';
-        else if (w >= 2560) savedRes = '1440p';
-        else if (w >= 1920) savedRes = '1080p';
-        else savedRes = '720p';
-        localStorage.setItem('ui_resolution', savedRes);
-        localStorage.setItem('ui_resolution_explicit', 'true');
-        console.log(`Auto-detected screen width: ${w}px. Setting default UI scale to: ${savedRes}`);
+    try {
+        const settings = await window.api.getSettings();
+        let resolution = settings.resolution;
+        if (!resolution) {
+            const width = window.screen.width;
+            resolution = width >= 3840 ? '4k' : width >= 2560 ? '1440p' : width >= 1920 ? '1080p' : '720p';
+            await window.api.saveSettings({ resolution });
+        }
+        applyResolution(resolution);
+        applyLanguage(settings.language);
+    } catch (error) {
+        console.error('[Settings]', error);
+        applyLanguage('tr');
+        document.getElementById('settings-error').classList.remove('hidden');
     }
-    console.log("Applying resolution:", savedRes);
-    applyResolution(savedRes);
 
     try {
         // Load library from local JSON cache instantly (sub-50ms startup!)
@@ -169,7 +169,7 @@ function renderLibrary() {
     libraryList.innerHTML = '';
     
     if (!library.length && currentView !== 'history') { 
-        libraryList.innerHTML = '<div class="empty-msg">Klasör seçin veya video ekleyin.</div>'; 
+        libraryList.innerHTML = '<div class="empty-msg">' + t('empty') + '</div>';
         return; 
     }
 
@@ -187,11 +187,11 @@ function renderLibrary() {
         if (currentFolderFilter === null) {
             const grouped = groupVideosByFolder(library);
             if (grouped.size === 0) {
-                libraryList.innerHTML = '<div class="empty-msg">Klasör bulunamadı.</div>';
+                libraryList.innerHTML = '<div class="empty-msg">' + t('noFolders') + '</div>';
                 return;
             }
             grouped.forEach((videos, folderName) => {
-                addItem(null, folderName, `${videos.length} video`, () => {
+                addItem(null, folderName, t('videoCount').replace('{count}', videos.length), () => {
                     currentFolderFilter = folderName;
                     renderLibrary();
                 });
@@ -199,7 +199,7 @@ function renderLibrary() {
         } else {
             // Drill down mode: list videos inside filtered folder
             // Back item
-            addBackItem("← Geri Dön", () => {
+            addBackItem(t('back'), () => {
                 currentFolderFilter = null;
                 renderLibrary();
             });
@@ -217,7 +217,7 @@ function renderLibrary() {
         // Geçmiş: Son izlenenler
         const history = getHistory();
         if (!history.length) {
-            libraryList.innerHTML = '<div class="empty-msg">Geçmişiniz henüz temiz.</div>';
+            libraryList.innerHTML = '<div class="empty-msg">' + t('emptyHistory') + '</div>';
             return;
         }
         history.forEach((t, i) => {
@@ -232,7 +232,7 @@ function renderLibrary() {
 
 // ── Path Helpers ──────────────────────────────────────────────────────────────
 function getParentFolder(filePath) {
-    if (!filePath) return 'Bilinmeyen Klasör';
+    if (!filePath) return t('unknownFolder');
     const parts = filePath.split(/[\\/]/);
     return parts.length > 1 ? parts[parts.length - 2] : 'Video';
 }
@@ -323,7 +323,7 @@ function playTrack(track) {
     mainVideo.src = streamUrl;
 
     const parentFolder = getParentFolder(track.path);
-    trackTitle.textContent  = track.title  || 'Bilinmeyen Video';
+    trackTitle.textContent  = track.title || t('unknownTrack');
     trackArtist.textContent = parentFolder || '—';
 
     playerPanel.classList.add('revealed');
@@ -349,7 +349,7 @@ function playTrack(track) {
                 // Only resume if watched more than 5 seconds and not near end
                 if (time > 5) {
                     mainVideo.currentTime = time;
-                    showNotification("Kaldığınız yerden devam ediliyor...");
+                    showNotification(t('resuming'));
                 }
             }
         })
@@ -360,6 +360,8 @@ function playTrack(track) {
 }
 
 function setPlayState(playing) {
+    btnPlay.title = t(playing ? 'pause' : 'play');
+    btnPlay.setAttribute('aria-label', btnPlay.title);
     if (playing) {
         iconPlay.classList.add('hidden');
         iconPause.classList.remove('hidden');
@@ -434,14 +436,14 @@ document.getElementById('btn-next').addEventListener('click', () => {
 btnShuffle.addEventListener('click', () => {
     isShuffle = !isShuffle;
     btnShuffle.classList.toggle('active', isShuffle);
-    showNotification(isShuffle ? "Karışık Çalma Aktif" : "Karışık Çalma Devre Dışı");
+    showNotification(isShuffle ? t('shuffleOn') : t('shuffleOff'));
 });
 
 // Repeat Toggle
 btnRepeat.addEventListener('click', () => {
     isRepeat = !isRepeat;
     btnRepeat.classList.toggle('active', isRepeat);
-    showNotification(isRepeat ? "Tekrar Çalma Aktif" : "Tekrar Çalma Devre Dışı");
+    showNotification(isRepeat ? t('repeatOn') : t('repeatOff'));
 });
 
 // Volume & Mute Toggle
@@ -646,12 +648,7 @@ settingsModal.addEventListener('click', e => {
 });
 
 resBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-        const res = btn.dataset.res;
-        applyResolution(res);
-        localStorage.setItem('ui_resolution', res);
-        localStorage.setItem('ui_resolution_explicit', 'true');
-    });
+    btn.addEventListener('click', () => persistSettings({ resolution: btn.dataset.res }));
 });
 
 function applyResolution(res) {
@@ -670,3 +667,23 @@ function applyResolution(res) {
         else b.classList.remove('active');
     });
 }
+
+// Save before applying so a failed write leaves the last saved preference active.
+let settingsWrite = Promise.resolve();
+function persistSettings(patch) {
+    settingsWrite = settingsWrite.then(async () => {
+        try {
+            const settings = await window.api.saveSettings(patch);
+            applyResolution(settings.resolution);
+            applyLanguage(settings.language);
+            document.getElementById('settings-error').classList.add('hidden');
+        } catch (error) {
+            console.error('[Settings]', error);
+            document.getElementById('settings-error').classList.remove('hidden');
+        }
+    });
+    return settingsWrite;
+}
+document.querySelectorAll('[data-language]').forEach(btn => {
+    btn.addEventListener('click', () => persistSettings({ language: btn.dataset.language }));
+});

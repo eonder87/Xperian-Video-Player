@@ -147,3 +147,10 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Local application data and runtime files
+/data/
+/temp/
+/library.ini
+/library.json
+/settings.json
